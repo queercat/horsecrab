@@ -48,3 +48,38 @@ table {
 }
 
 /** User styles */
+
+
+@font-face {
+	font-family: "Ubuntu";
+	src: url("/fonts/Ubuntu/Ubuntu-Regular.ttf");
+	font-weight: normal;
+	font-style: normal;
+}
+
+* {
+	font-family: "Ubuntu"
+}
+
+html, body, main {
+	display: flex;
+	flex-direction: column;
+	flex: 1;
+	min-height: 100%;
+	min-width: 100%;
+}
+
+.form {
+	display: flex;
+	flex-direction: column;
+}
+
+.div__full-centered {
+	display: flex;
+	flex: 1;
+	justify-content: center;
+	align-items: center;
+	min-width: 100%;
+	min-height: 100%;
+	flex-direction: column;
+}

@@ -1,0 +1,28 @@
+@extends
+@* TODO: extract into form component *@
+
+<div class="div__full-centered">
+  <h1>Register</h1>
+  <form method="post">
+    <fieldset>
+      <label>
+        Username
+        <input
+          name="username"
+          placeholder="Username"
+          autocomplete="username"
+        />
+      </label>
+      <label>
+        Password
+        <input
+          type="password"
+          name="password"
+          placeholder="Password"
+          autocomplete="password"
+        />
+      </label>
+    </fieldset>
+    <input type="submit" value="Register" />
+  </form>
+</div>

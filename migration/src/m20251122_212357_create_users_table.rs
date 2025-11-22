@@ -9,7 +9,7 @@ impl MigrationTrait for Migration {
         manager
             .create_table(
                 Table::create()
-                    .table("user")
+                    .table("users")
                     .if_not_exists()
                     .col(pk_auto("id"))
                     .col(string("username"))
@@ -21,7 +21,7 @@ impl MigrationTrait for Migration {
 
     async fn down(&self, manager: &SchemaManager) -> Result<(), DbErr> {
         manager
-            .drop_table(Table::drop().table("user").to_owned())
+            .drop_table(Table::drop().table("users").to_owned())
             .await
     }
 }

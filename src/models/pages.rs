@@ -7,3 +7,9 @@ pub struct HomePage {
 
 #[derive(RsHtml)]
 pub struct IndexPage {}
+
+#[derive(RsHtml)]
+pub struct RegistrationPage {}
+
+#[derive(RsHtml)]
+pub struct LoginPage {}

@@ -1,5 +1,5 @@
 use sea_orm::{
-    ConnectionTrait, Database, DatabaseBackend, DatabaseConnection, DbBackend, DbErr, Statement,
+    ConnectionTrait, Database, DatabaseConnection, DbBackend, DbErr, Statement,
 };
 
 pub async fn set_up_db() -> Result<DatabaseConnection, DbErr> {
