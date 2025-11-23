@@ -60,7 +60,13 @@ fn process(source: String, captures: Vec<Captures>) -> Result<String, String> {
 
         let data: String = lua.globals().get("data").unwrap();
 
-        text.push_str(&data);
+        let mut left = text[0..block.start].to_string().to_owned();
+        let right = &text[block.end..text.len()];
+
+        left.push_str(&data);
+        left.push_str(right);
+
+        text = left;
     }
 
     Ok(text)

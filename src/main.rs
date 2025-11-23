@@ -46,11 +46,11 @@ async fn register() -> RawHtml<String> {
 
 #[get("/login")]
 async fn login() -> RawHtml<String> {
-    let mut page = LoginPage {
+    let mut page = Box::new(LoginPage {
         error: "".to_string()
-    };
+    }) as Box<dyn RsHtml + 'static>;
 
-    RawHtml(page.render().unwrap())
+    RawHtml(render(&mut page).unwrap())
 }
 
 #[post("/register", data = "<registration_request>")]
