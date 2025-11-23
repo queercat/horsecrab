@@ -17,7 +17,7 @@ use rshtml::traits::RsHtml;
 use crate::database::setup::set_up_db;
 use crate::models::pages::{HomePage, LoginPage, RegistrationPage};
 use crate::services::user_service::UserService;
-use crate::utilities::page::render;
+use crate::utilities::page::{Render, render};
 
 #[get("/")]
 async fn index(user_service: &State<UserService>) -> RawHtml<String> {
@@ -50,7 +50,7 @@ async fn login() -> RawHtml<String> {
         error: "".to_string()
     }) as Box<dyn RsHtml + 'static>;
 
-    RawHtml(render(&mut page).unwrap())
+    RawHtml(render(&mut page, None).unwrap())
 }
 
 #[post("/register", data = "<registration_request>")]
@@ -84,7 +84,7 @@ async fn handle_login(
         error: if result { "true".to_string() } else { "false".to_string() }
     }) as Box<dyn RsHtml + 'static>;
 
-    RawHtml(render(&mut page).unwrap())
+    RawHtml(page.render(None).unwrap())
 }
 
 #[launch]
