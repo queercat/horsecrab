@@ -4,6 +4,7 @@ extern crate rocket;
 mod database;
 mod models;
 mod services;
+mod utilities;
 
 use std::sync::Arc;
 
@@ -14,7 +15,7 @@ use rocket::{fs::FileServer, response::content::RawHtml};
 use rshtml::traits::RsHtml;
 
 use crate::database::setup::set_up_db;
-use crate::models::pages::{HomePage, RegistrationPage};
+use crate::models::pages::{HomePage, LoginPage, RegistrationPage};
 use crate::services::user_service::UserService;
 
 #[get("/")]
@@ -22,6 +23,7 @@ async fn index(user_service: &State<UserService>) -> RawHtml<String> {
     let result = user_service.get_users().await;
 
     let mut page = HomePage {
+        error: "".to_string(),
         title: if result.is_ok() {
             "ok".to_string()
         } else {
@@ -34,7 +36,18 @@ async fn index(user_service: &State<UserService>) -> RawHtml<String> {
 
 #[get("/register")]
 async fn register() -> RawHtml<String> {
-    let mut page = RegistrationPage {};
+    let mut page = RegistrationPage {
+        error: "".to_string()
+    };
+
+    RawHtml(page.render().unwrap())
+}
+
+#[get("/login")]
+async fn login() -> RawHtml<String> {
+    let mut page = LoginPage {
+        error: "".to_string()
+    };
 
     RawHtml(page.render().unwrap())
 }
@@ -48,7 +61,28 @@ async fn handle_register(
         .create_user(registration_request.username, registration_request.password)
         .await;
 
-    let mut page = RegistrationPage {};
+    let error = match result {
+        Ok(_) => "".to_string(),
+        Err(s) => s
+    };
+
+    let mut page = RegistrationPage {
+        error
+    };
+    RawHtml(page.render().unwrap())
+}
+
+#[post("/login", data = "<login_request>")]
+async fn handle_login(
+    user_service: &State<UserService>,
+    login_request: Form<models::requests::LoginRequest<'_>>,
+) -> RawHtml<String> {
+    let result = user_service.login_user(login_request.username, login_request.password).await;
+
+    let mut page = LoginPage {
+        error: if result { "true".to_string() } else { "false".to_string() }
+    };
+
     RawHtml(page.render().unwrap())
 }
 
@@ -65,6 +99,6 @@ async fn rocket() -> _ {
 
     rocket::build()
         .manage(user_service)
-        .mount("/", routes![index, register, handle_register])
+        .mount("/", routes![index, register, handle_register, login, handle_login])
         .mount("/", FileServer::from("./public"))
 }

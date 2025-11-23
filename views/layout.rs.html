@@ -6,9 +6,29 @@
     <meta name="color-scheme" content="light dark" />
     <title>@render("title") - My Website</title>
     <link rel="stylesheet" href="/css/pico.min.css" />
+    <link rel="stylesheet" href="/css/pico.colors.min.css" />
+    <link rel="stylesheet" href="/css/font-awesome.min.css" />
     <link rel="stylesheet" href="/css/global.css" />
   </head>
   <body>
+    <header>
+      <nav class="nav">
+        <ul>
+          <li><strong><a href="/"><i class="fa-solid fa-horse-head"></i></a></strong></li>
+        </ul>
+        <ul>
+          <li><a href="/login" class="contrast">Login</a></li>
+          <li><a href="/register" class="contrast">Register</a></li>
+          <li><a href="/signout" class="contrast">Signout</a></li>
+        </ul>
+      </nav>
+      @if self.error.len() > 0 {
+      <article class="article__card article__card-error">
+        <i class="fa-solid fa-triangle-exclamation"></i>
+        <p>@self.error</p>
+      </article>
+      }
+    </header>
     <main class="container">@render_body</main>
   </body>
 </html>

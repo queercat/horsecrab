@@ -4,10 +4,10 @@ use rocket::{
     futures::lock::{Mutex, MutexGuard},
 };
 use sea_orm::{
-    ActiveModelTrait, ActiveValue::{self, Set}, ConnectionTrait, DatabaseConnection, EntityTrait, sea_query::{Cond, Query}
+    ActiveModelTrait, ActiveValue::Set, ColumnTrait, DatabaseConnection, EntityTrait, QueryFilter, prelude::Uuid
 };
 
-use crate::database::entities::users::Entity as User;
+use crate::{database::entities::users::{self, Entity as User}, utilities::password::{hash_password, verify_password}};
 use crate::database::entities::users::Model as UserModel;
 use crate::database::entities::users::ActiveModel as ActiveUserModel;
 
@@ -31,9 +31,12 @@ impl UserService  {
     pub async fn create_user(&self, username: &str, password: &str) -> Result<UserModel, String> {
         let db = self.acquire_db().await.clone();
 
+        let hashed_password = hash_password(password.to_string())?;
+
         let new_user = ActiveUserModel {
             username: Set(username.to_owned()),
-            password: Set(password.as_bytes().to_vec().to_owned()),
+            password: Set(hashed_password),
+            id: Set(Uuid::new_v4()),
             ..Default::default()
         };
 
@@ -43,6 +46,20 @@ impl UserService  {
             Ok(user) => Ok(user),
             _ => Err("Unable to create user!".to_string()),
         }
+    }
+
+    pub async fn login_user(&self, username: &str, password: &str) -> bool {
+        let db = self.acquire_db().await.clone();
+
+        let user = match User::find().filter(users::Column::Username.eq(username)).one(&db).await {
+            Ok(r) => match r {
+                Some(u) => u,
+                _ => return false
+            },
+            _ => return false
+        };
+
+        verify_password(password.to_string(), user.password)
     }
 
     pub async fn get_users(&self) -> Result<Vec<UserModel>, String> {
