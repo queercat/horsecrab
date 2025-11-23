@@ -21,3 +21,7 @@ touch database.db # ignore if you're using postgres or mysql
 cargo run -p migration fresh
 cargo run
 ```
+
+# Notes
+
+Zero AI was used in the making of this project
