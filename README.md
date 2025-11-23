@@ -1,5 +1,5 @@
 # 🐴🦀
-This is a WIP forum that doesn't use any JavaScript! And it shouldn't suck either. It uses SSR templates.
+This is a WIP forum that doesn't use any JavaScript! And it shouldn't suck either. It uses SSR templates powered by rshtml.
 
 # Goals
 - Should be lightweight and fast.
@@ -7,6 +7,9 @@ This is a WIP forum that doesn't use any JavaScript! And it shouldn't suck eithe
 - It should look good.
 - It should be accessible and modern.
 - Shouldn't be a nightmare to host.
+
+# Progress
+Current work is tracked in [PROJECT.md](/PROJECT.md)
 
 # Requirements
 - Rust :D
