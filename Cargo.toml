@@ -9,6 +9,8 @@ members = [".", "migration"]
 [dependencies]
 argon2 = "0.5.3"
 dotenv = "0.15.0"
+html5ever = "0.36.1"
+markup5ever_rcdom = "0.36.0"
 mlua = { version = "0.11.4", features = ["lua54", "vendored"] }
 regex = "1.12.2"
 rocket = "0.5.1"

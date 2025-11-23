@@ -22,16 +22,16 @@
           <li><a href="/signout" class="contrast">Signout</a></li>
         </ul>
       </nav>
-      <!--% 
-        data = "test" 
-      %-->
-      <article class="article__card article__card-error">
-        <i class="fa-solid fa-triangle-exclamation"></i>
-        <p>%s</p>
-      </article>
+      <Lua code="if error == nil then data = nil end">
+        <article class="article__card article__card-error">
+          <i class="fa-solid fa-triangle-exclamation"></i>
+          <p>%s</p>
+        </article>
+      </Lua>
     </header>
     <main class="container">
-      <!--% data = children -->
+      <Lua code="data = children">
+      </Lua>
     </main>
   </body>
 </html>
