@@ -1,4 +1,13 @@
-<Lua code="each(posts)">
-    <h2>$title</h2>
-    <p>$description</p>
-</Lua>
+<div class="container-fluid">
+    <h1>Topics</h1>
+    <Lua code="each(posts)">
+        <a href="/topic/$title">
+        <article>
+            <header>
+                <h2>$title</h2>
+            </header>
+            <p>$description</p>
+        </article>
+        </a>
+    </Lua>
+</div>

@@ -3,6 +3,7 @@ use erased_serde::Serialize;
 use rocket::response::content::RawHtml;
 use std::sync::Mutex;
 
+
 #[get("/registration")]
 pub async fn registration() -> RawHtml<String> {
     let mut environment = Vec::<(String, Mutex<Box<dyn Serialize + Send>>)>::new();
@@ -17,3 +18,4 @@ pub async fn registration() -> RawHtml<String> {
 
     RawHtml(layout.render(&environment).unwrap())
 }
+

@@ -1,17 +1,12 @@
-use crate::{
-    services::{topic_service::TopicService, user_service::UserService},
-    utilities::page::Render,
-};
+use crate::utilities::page::Render;
 use erased_serde::Serialize;
-use rocket::{State, response::content::RawHtml};
+use rocket::response::content::RawHtml;
 use std::sync::Mutex;
 
-#[get("/index")]
-pub async fn index(post_service: &State<TopicService>) -> RawHtml<String> {
-    let mut environment = Vec::<(String, Mutex<Box<dyn Serialize + Send>>)>::new();
-    let posts = post_service.get_topics().await;
 
-    environment.push(("posts".to_string(), Mutex::new(Box::new(posts))));
+#[get("/index")]
+pub async fn index() -> RawHtml<String> {
+    let mut environment = Vec::<(String, Mutex<Box<dyn Serialize + Send>>)>::new();
 
     let mut page_template = include_str!("../../views/index.template.html").to_string();
     let page = page_template.render(&environment).unwrap();
@@ -23,3 +18,4 @@ pub async fn index(post_service: &State<TopicService>) -> RawHtml<String> {
 
     RawHtml(layout.render(&environment).unwrap())
 }
+
