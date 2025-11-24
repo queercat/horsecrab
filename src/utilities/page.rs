@@ -6,17 +6,18 @@ use erased_serde::{Serialize};
 use rocket::futures::lock::Mutex;
 
 pub trait Render {
-    async fn render(&mut self, environment: &Vec<(String, Box<Mutex<dyn Serialize>>)>) -> Result<String, String>;
+    async fn render(&mut self, environment: &Vec<(String, Mutex<Box<dyn Serialize>>)>) -> Result<String, String>;
 }
 
 impl Render for String {
-    async fn render(&mut self, environment: &Vec<(String, Box<Mutex<dyn Serialize>>)>) -> Result<String, String> {
+    async fn render(&mut self, environment: &Vec<(String, Mutex<Box<dyn Serialize>>)>) -> Result<String, String> {
         let lua = Lua::new();
         let mut env = vec![];
 
         for (k, v) in environment {
-            let z = v.to_owned().lock().await;
-            let value = lua.to_value(&z).unwrap();
+            let value = v.lock().await;
+            let value = value.as_ref();
+            let value = lua.to_value(&value).unwrap();
             env.push((k.to_owned(), value));
         };
 
