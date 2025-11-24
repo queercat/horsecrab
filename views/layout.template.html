@@ -22,15 +22,17 @@
           <li><a href="/signout" class="contrast">Signout</a></li>
         </ul>
       </nav>
-      <Lua code="if error == nil then data = nil end">
+      <Lua code='if error == nil then data = "" end'>
         <article class="article__card article__card-error">
           <i class="fa-solid fa-triangle-exclamation"></i>
-          <p>%s</p>
+          <Lua code="data = error">
+          </Lua>
         </article>
       </Lua>
     </header>
     <main class="container">
       <Lua code="data = children">
+        <p></p>
       </Lua>
     </main>
   </body>

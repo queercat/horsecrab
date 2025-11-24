@@ -1,11 +1,7 @@
-use std::{collections::HashMap, env, io::Cursor};
+use std::collections::HashMap;
 
-use html5ever::{
-    ParseOpts, interface::ElemName, local_name, parse_document, parse_fragment, serialize, tendril::{Tendril, TendrilSink}
-};
-use markup5ever_rcdom::{Handle, Node, NodeData, RcDom, SerializableHandle};
+use lol_html::{HtmlRewriter, Settings, element, html_content::Element};
 use mlua::Lua;
-use regex::{Captures, Regex};
 
 pub trait Render {
     fn render(&mut self, environment: Option<&HashMap<String, String>>) -> Result<String, String>;
@@ -17,88 +13,57 @@ impl Render for String {
     }
 }
 
-struct Block {
-    /// The lua expression inside the source match.
-    expression: String,
-    /// Stuff between the two matches.
-    data: String,
-    /// This is the first character index of the block.
-    start: usize,
-    /// This is the last character index of the block.
-    end: usize,
-}
-
-pub fn process(handle: &mut Handle) {
-    let node = handle;
-
-    match &node.data {
-        NodeData::Element {
-            name,
-            attrs,
-            template_contents,
-            mathml_annotation_xml_integration_point,
-        } => {
-            if name.local.to_string() == "lua".to_string() {
-            }
-        }
-        _ => (),
-    }
-
-    for (idx, child) in node.children.borrow_mut().iter_mut().enumerate() {
-        process(child)
-    }
-}
-
 pub fn render(
     template: String,
     environment: Option<&HashMap<String, String>>,
 ) -> Result<String, String> {
-    let mut stream = Cursor::new(template);
-    let opts = ParseOpts::default();
-    let mut dom = parse_document(RcDom::default(), opts)
-        .from_utf8()
-        .read_from(&mut stream)
-        .unwrap();
+    let mut buffer = vec![];
+    let mut rewriter = HtmlRewriter::new(
+        Settings {
+            element_content_handlers: vec![element!("lua", |el: &mut Element| {
+                let start_location = el.source_location().bytes().end;
+                let expression = el.get_attribute("code").unwrap_or("".to_string());
+                el.remove();
+                if let Some(handlers) = el.end_tag_handlers() {
+                    let source = template.clone();
+                    let env = match environment {
+                        Some(v) => Some(v.clone()),
+                        None => None,
+                    };
+                    let e = expression.clone();
 
-    process(&mut dom.document);
+                    handlers.push(Box::new(move |end| {
+                        let end_location = end.source_location().bytes().start;
+                        let html = source[start_location..end_location].to_string();
 
-    let mut bytes = vec![];
-    let document: SerializableHandle = dom.document.clone().into();
-    serialize(&mut bytes, &document, Default::default()).unwrap();
+                        let lua = Lua::new();
 
-    let text = String::from_utf8(bytes).unwrap();
+                        if let Some(e) = env {
+                            for (key, value) in e.into_iter() {
+                                lua.globals()
+                                    .set(key.to_string(), value.to_string())
+                                    .expect("Unable to assign globals.")
+                            }
+                        }
 
-    Ok(text)
+                        lua.globals().set("data", html).unwrap();
+                        lua.load(e).exec().expect("Invalid Lua expression.");
+
+                        let data: String = lua.globals().get("data").unwrap();
+
+                        end.before(&data, lol_html::html_content::ContentType::Html);
+
+                        Ok(())
+                    }));
+                }
+                Ok(())
+            })],
+            ..Settings::new()
+        },
+        |c: &[u8]| buffer.extend_from_slice(c),
+    );
+
+    rewriter.write(template.as_bytes()).unwrap();
+
+    Ok(String::from_utf8(buffer).unwrap())
 }
-
-// fn get_captures(source: &String) -> std::option::Option<regex::Captures<'_>> {
-//     let source_regex = Regex::new(r"(?<start_token><!--%)|(?<end_token>%-->)").unwrap();
-//     source_regex.captures(&source)
-// }
-
-// fn evaluate(source: &String, captures: Captures<'_>, environment: Option<&HashMap<String, String>>) -> Result<String, String> {
-//     let mut text = source;
-
-//     let lua = Lua::new();
-
-//     if let Some(e) = environment {
-//         for (key, value) in e.into_iter() {
-//             lua.globals().set(key.to_string(), value.to_string()).unwrap();
-//         }
-//     }
-
-//     lua.globals().set("data", block.data).unwrap();
-//     lua.load(block.expression).exec().unwrap();
-
-//     let data: String = lua.globals().get("data").unwrap();
-
-//     let mut left = text[0..block.start].to_string().to_owned();
-//     let right = &text[block.end..text.len()];
-
-//     left.push_str(&data);
-//     left.push_str(right);
-
-//     text = left;
-
-//     Ok(text)
-// }
