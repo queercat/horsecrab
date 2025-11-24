@@ -1,5 +1,5 @@
 use crate::{
-    services::{post_service::PostService, user_service::UserService},
+    services::{topic_service::TopicService, user_service::UserService},
     utilities::page::Render,
 };
 use erased_serde::Serialize;
@@ -7,9 +7,9 @@ use rocket::{State, response::content::RawHtml};
 use std::sync::Mutex;
 
 #[get("/index")]
-pub async fn index(post_service: &State<PostService>) -> RawHtml<String> {
+pub async fn index(post_service: &State<TopicService>) -> RawHtml<String> {
     let mut environment = Vec::<(String, Mutex<Box<dyn Serialize + Send>>)>::new();
-    let posts = post_service.get_posts().await;
+    let posts = post_service.get_topics().await;
 
     environment.push(("posts".to_string(), Mutex::new(Box::new(posts))));
 

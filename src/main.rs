@@ -16,7 +16,7 @@ use rocket::{fs::FileServer, response::content::RawHtml};
 
 use crate::database::setup::set_up_db;
 use crate::routes::get_routes;
-use crate::services::post_service::PostService;
+use crate::services::topic_service::TopicService;
 use crate::services::user_service::UserService;
 
 #[post("/register", data = "<registration_request>")]
@@ -57,7 +57,7 @@ async fn rocket() -> _ {
     };
 
     let user_service = UserService::new(Arc::clone(&db));
-    let post_service = PostService::new(Arc::clone(&db));
+    let post_service = TopicService::new(Arc::clone(&db));
 
     rocket::build()
         .manage(user_service)

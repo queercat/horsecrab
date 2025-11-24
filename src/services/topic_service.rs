@@ -8,22 +8,22 @@ use crate::{
     services::service_trait::RequiresDatabase,
 };
 
-pub struct PostService {
+pub struct TopicService {
     db: Arc<Mutex<DatabaseConnection>>,
 }
 
-impl RequiresDatabase for PostService {
+impl RequiresDatabase for TopicService {
     async fn acquire_db(&self) -> MutexGuard<'_, DatabaseConnection> {
         self.db.lock().await
     }
 }
 
-impl PostService {
+impl TopicService {
     pub fn new(db: Arc<Mutex<DatabaseConnection>>) -> Self {
         Self { db }
     }
 
-    pub async fn get_posts(&self) -> Vec<Model> {
+    pub async fn get_topics(&self) -> Vec<Model> {
         let db = self.acquire_db().await.clone();
         let posts = Entity::find().all(&db).await;
 
