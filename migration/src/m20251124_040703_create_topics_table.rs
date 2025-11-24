@@ -11,7 +11,7 @@ impl MigrationTrait for Migration {
                 Table::create()
                     .table("topics")
                     .if_not_exists()
-                    .col(pk_uuid("id"))
+                    .col(pk_auto("id"))
                     .col(string("title"))
                     .col(string("description"))
                     .to_owned(),

@@ -36,7 +36,6 @@ impl UserService  {
         let new_user = ActiveUserModel {
             username: Set(username.to_owned()),
             password: Set(hashed_password),
-            id: Set(Uuid::new_v4()),
             ..Default::default()
         };
 

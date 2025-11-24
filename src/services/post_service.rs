@@ -4,7 +4,7 @@ use rocket::{
     futures::lock::{Mutex, MutexGuard},
 };
 use sea_orm::{
-    ActiveModelTrait, ActiveValue::Set, ColumnTrait, DatabaseConnection, EntityTrait, QueryFilter, prelude::Uuid
+    DatabaseConnection, EntityTrait
 };
 
 use crate::{database::entities::topics::{ActiveModel, Entity, Model}, services::service_trait::RequiresDatabase};
