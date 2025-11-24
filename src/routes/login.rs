@@ -8,7 +8,7 @@ use std::sync::Mutex;
 pub async fn login() -> RawHtml<String> {
     let mut environment = Vec::<(String, Mutex<Box<dyn Serialize + Send>>)>::new();
 
-    let mut page_template = include_str!("../../views/index.template.html").to_string();
+    let mut page_template = include_str!("../../views/login.template.html").to_string();
     let page = page_template.render(&environment).unwrap();
 
     environment.push(("children".to_string(), Mutex::new(Box::new(page))));

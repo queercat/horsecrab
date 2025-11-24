@@ -1,5 +1,6 @@
 use std::sync::Arc;
 
+use anyhow::anyhow;
 use rocket::futures::lock::{Mutex, MutexGuard};
 use sea_orm::{
     ActiveModelTrait, ActiveValue::Set, ColumnTrait, DatabaseConnection, EntityTrait, QueryFilter,
@@ -8,6 +9,8 @@ use sea_orm::{
 
 use crate::database::entities::users::ActiveModel as ActiveUserModel;
 use crate::database::entities::users::Model as UserModel;
+use crate::utilities::auth::JWT;
+use crate::utilities::auth::create_jwt;
 use crate::{
     database::entities::users::{self, Entity as User},
     utilities::password::{hash_password, verify_password},
@@ -49,31 +52,46 @@ impl UserService {
         }
     }
 
-    pub async fn login_user(&self, username: &str, password: &str) -> bool {
+    pub async fn login_user(&self, username: &str, password: &str) -> anyhow::Result<String> {
         let db = self.acquire_db().await.clone();
 
         let user = match User::find()
             .filter(users::Column::Username.eq(username))
             .one(&db)
             .await
+            .unwrap()
         {
-            Ok(r) => match r {
-                Some(u) => u,
-                _ => return false,
-            },
-            _ => return false,
+            Some(u) => u,
+            _ => return Err(anyhow!("Invalid username or password.")),
         };
 
-        verify_password(password.to_string(), user.password)
+        match verify_password(password.to_string(), user.password) {
+            true => Ok(create_jwt(user.id)?),
+            false => Err(anyhow!("Invalid username or password.")),
+        }
     }
 
     pub async fn get_users(&self) -> Result<Vec<UserModel>, String> {
         let db = self.acquire_db().await.clone();
-        let users = User::find().all(&db).await;
+        let users = User::find().all(&db).await.unwrap();
 
-        match users {
-            Ok(users) => Ok(users),
-            _ => Err("Unable to create user!".to_string()),
-        }
+        Ok(users)
+    }
+
+    pub async fn get_user_by_id(&self, id: i64) -> anyhow::Result<UserModel> {
+        let db = self.acquire_db().await.clone();
+        let user = User::find()
+            .filter(users::Column::Id.eq(id))
+            .one(&db)
+            .await
+            .unwrap();
+
+        user.ok_or(anyhow!("No user with id: {}", id))
+    }
+
+    pub async fn get_user_from_jwt(&self, jwt: &JWT) -> anyhow::Result<UserModel> {
+        let user = self.get_user_by_id(jwt.claims.subject_id).await;
+
+        Ok(user?)
     }
 }

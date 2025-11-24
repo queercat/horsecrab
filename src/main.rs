@@ -12,6 +12,7 @@ use std::sync::Arc;
 use rocket::State;
 use rocket::form::Form;
 use rocket::futures::lock::Mutex;
+use rocket::http::{Cookie, CookieJar};
 use rocket::{fs::FileServer, response::content::RawHtml};
 
 use crate::database::setup::set_up_db;
@@ -19,19 +20,15 @@ use crate::routes::get_routes;
 use crate::services::topic_service::TopicService;
 use crate::services::user_service::UserService;
 
-#[post("/register", data = "<registration_request>")]
+#[post("/registration", data = "<registration_request>")]
 async fn handle_register(
     user_service: &State<UserService>,
     registration_request: Form<models::requests::RegistrationRequest<'_>>,
 ) -> RawHtml<String> {
     let result = user_service
         .create_user(registration_request.username, registration_request.password)
-        .await;
-
-    let error = match result {
-        Ok(_) => "".to_string(),
-        Err(s) => s,
-    };
+        .await
+        .unwrap();
 
     RawHtml("".to_string())
 }
@@ -40,10 +37,17 @@ async fn handle_register(
 async fn handle_login(
     user_service: &State<UserService>,
     login_request: Form<models::requests::LoginRequest<'_>>,
+    jar: &CookieJar<'_>
 ) -> RawHtml<String> {
-    let result = user_service
+    let jwt = user_service
         .login_user(login_request.username, login_request.password)
-        .await;
+        .await
+        .unwrap();
+
+    let authorization_cookie = Cookie::new("authorization", jwt);
+
+    jar.add(authorization_cookie);
+
     RawHtml("".to_string())
 }
 
@@ -63,5 +67,6 @@ async fn rocket() -> _ {
         .manage(user_service)
         .manage(post_service)
         .mount("/", get_routes())
+        .mount("/", routes![handle_login, handle_register])
         .mount("/", FileServer::from("./public"))
 }
