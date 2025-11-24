@@ -10,6 +10,8 @@ def get_root_directory() -> str:
     return base_path.decode("utf-8")[0:-1]
 
 def extract_route(route: str) -> str:
+    if route.startswith("<"):
+        return "index"
     return route.split(".")[0]
 
 def get_template(template_name: str) -> string.Template:
@@ -44,6 +46,7 @@ def generate_routes(view_path: str = None, generated_path: str = None):
         route = to_visit.pop(0)
         current_path = os.path.join(view_path, route)
         for item in sorted(os.listdir(current_path)):
+            # todo: add support for dynamic routes.
             if os.path.isfile(os.path.join(current_path, item)):
                 routes.append((route, extract_route(item)))
             else:
@@ -70,8 +73,6 @@ def generate_routes(view_path: str = None, generated_path: str = None):
         path = os.path.join(path, f"{file}.rs")
 
         if os.path.exists(path):
-            # for now let's not override paths already made.
-            # continue
             pass
 
 
