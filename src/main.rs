@@ -20,7 +20,7 @@ use crate::routes::get_routes;
 use crate::services::topic_service::TopicService;
 use crate::services::user_service::UserService;
 
-#[post("/registration", data = "<registration_request>")]
+#[post("/register", data = "<registration_request>")]
 async fn handle_register(
     user_service: &State<UserService>,
     registration_request: Form<models::requests::RegistrationRequest<'_>>,

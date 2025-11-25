@@ -30,7 +30,7 @@ impl TemplateEngine {
 
         if self.use_layout {
             self.set("children", rendered);
-            template = fs::read_to_string(self.get_path_to_template(&"layout"))?;
+            template = fs::read_to_string(self.get_path_to_template(&self.layout_path))?;
             rendered = template.render(&self.environment)?;
             self.delete("children");
         }
@@ -56,7 +56,7 @@ impl Default for TemplateEngine {
             base_path: Path::new(&"./views".to_string()).to_owned(),
             environment: Vec::new(),
             use_layout: true,
-            layout_path: Path::new(&"./views/layout.index.html".to_string()).to_owned(),
+            layout_path: Path::new(&"layout".to_string()).to_owned(),
         }
     }
 }
@@ -88,13 +88,23 @@ impl Render for String {
             lua.globals().set(k, v).expect("Unable to assign globals.")
         }
 
+        lua.load("function show(v) if (v or '') == '' then data = '' end end")
+            .exec()
+            .unwrap();
+
+        lua.load("function hide(v) if (v or '') ~= '' then data = '' end end")
+            .exec()
+            .unwrap();
+
         lua.load("function maybe(v, o) return v or o end")
             .exec()
-            .expect("Invalid Lua expression.");
+            .unwrap();
+
         lua.load("function format(...) data = string.format(data, ...) end")
             .exec()
-            .expect("Invalid Lua expression.");
-        lua.load("function each(k) local template = data; data = ''; for _, post in ipairs(k) do data = data .. template:gsub('%$([a-zA-Z_]+)', post) end end").exec().expect("Invalud Lua expression.");
+            .unwrap();
+
+        lua.load("function each(k) local template = data; data = ''; for _, post in ipairs(k) do data = data .. template:gsub('%$([a-zA-Z_]+)', post) end end").exec().unwrap();
 
         render(self, lua)
     }

@@ -21,9 +21,15 @@
           </li>
         </ul>
         <ul>
-          <li><a href="/login" class="contrast">Login</a></li>
-          <li><a href="/register" class="contrast">Register</a></li>
-          <li><a href="/signout" class="contrast">Signout</a></li>
+          <Lua code="hide(user)"">
+            <li><a href="/login" class="contrast">Login</a></li>
+          </Lua>
+          <Lua code="hide(user)">
+            <li><a href="/register" class="contrast">Register</a></li>
+          </Lua>
+          <Lua code="show(user)">
+            <li><a href="/signout" class="contrast">Signout</a></li>
+          </Lua>
         </ul>
       </nav>
       <Lua code='if err == nil then data = "" end '>
