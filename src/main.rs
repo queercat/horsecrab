@@ -37,7 +37,7 @@ async fn handle_register(
 async fn handle_login(
     user_service: &State<UserService>,
     login_request: Form<models::requests::LoginRequest<'_>>,
-    jar: &CookieJar<'_>
+    jar: &CookieJar<'_>,
 ) -> RawHtml<String> {
     let jwt = user_service
         .login_user(login_request.username, login_request.password)
